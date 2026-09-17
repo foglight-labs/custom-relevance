@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Jev Ranking",
-  description: "Rank cities live with Jev, using factors and weights you control.",
+  title: "Custom Relevance",
+  description: "Rank anything live with Jev, using factors and weights you control.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

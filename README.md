@@ -1,4 +1,4 @@
-# Jev Ranking
+# Custom Relevance
 
 A one-screen ranking tool built on [Jev](https://docs.typesafe.ai), TypeSafe's System One
 model. Type in a list of things (cities, dishes, sports, websites, football clubs) and a
@@ -42,6 +42,24 @@ pnpm lint      # eslint
 pnpm exec tsc --noEmit
 pnpm build     # production build
 ```
+
+## Deploy (Railway)
+
+The repo ships a `Dockerfile` (Next.js `output: "standalone"`) and a `railway.json`, so
+Railway just needs to build and run it:
+
+1. Railway → **New Project** → **Deploy from GitHub repo** → pick this repo. Railway
+   detects the `Dockerfile` automatically.
+2. **Variables** → add `TYPESAFE_API_KEY`.
+3. **Settings → Networking → Custom Domain** → add `jev.foglight.co`. Railway shows a
+   CNAME target for it.
+4. In Cloudflare DNS for `foglight.co`, add `CNAME jev → <target Railway gave you>`.
+   Either proxy it (orange cloud, with SSL/TLS mode set to **Full (strict)**) or leave it
+   DNS-only — both work.
+5. `/api/health` is the healthcheck endpoint Railway polls during deploys.
+
+A single always-on instance of this app is light (idles well under 512 MB RAM), so it
+comfortably fits inside the Hobby plan's usage-based credit.
 
 ## How it's structured
 

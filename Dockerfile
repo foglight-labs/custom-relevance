@@ -14,6 +14,7 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+ARG NEXT_PUBLIC_POSTHOG_KEY
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm build
 

@@ -41,10 +41,6 @@ export function FactorStrip({
       className="overflow-x-auto border-b border-hairline bg-page px-4 py-4 sm:px-8 sm:py-5"
     >
       <div className="flex min-w-min items-stretch gap-3">
-        {factors.map((f) => (
-          <FactorCard key={f.id} factor={f} onEdit={onEditFactor} onSetWeight={onSetWeight} onRemove={onRemoveFactor} />
-        ))}
-
         {full ? (
           <div
             className={cn(
@@ -81,13 +77,17 @@ export function FactorStrip({
             onClick={() => setAdding(true)}
             className={cn(
               CARD,
-              "flex cursor-pointer flex-col items-center justify-center gap-[3px] border-2 border-dashed border-[#d1d5db] transition-colors hover:border-[#9ca3af] hover:bg-soft",
+              "flex cursor-pointer flex-col items-center justify-center gap-[3px] border-2 border-dashed border-accent/50 bg-panel transition-colors hover:border-accent hover:bg-accent/5",
             )}
           >
-            <span className="text-2xl leading-none font-normal text-dim">+</span>
-            <span className="text-[13px] font-medium text-muted">Add factor</span>
+            <span className="text-2xl leading-none font-normal text-accent">+</span>
+            <span className="text-[13px] font-medium text-accent">Add factor</span>
           </button>
         )}
+
+        {factors.map((f) => (
+          <FactorCard key={f.id} factor={f} onEdit={onEditFactor} onSetWeight={onSetWeight} onRemove={onRemoveFactor} />
+        ))}
       </div>
     </section>
   );

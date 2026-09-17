@@ -145,8 +145,11 @@ function DesktopRankingTable({
           </motion.div>
         ))}
 
-        <div className="grid h-[60px] items-center" style={{ gridTemplateColumns: template }}>
-          <span className="text-center text-base text-dim">{full ? "" : "+"}</span>
+        <div
+          className="grid h-[60px] items-center bg-soft/50"
+          style={{ gridTemplateColumns: template }}
+        >
+          <span className="text-center text-base text-accent">{full ? "" : "+"}</span>
           <div className="flex items-center gap-2.5 pl-3">
             {full ? (
               <span className="text-[13px] text-muted">
@@ -159,7 +162,7 @@ function DesktopRankingTable({
                   placeholder={`Add a ${noun}…`}
                   maxLength={MAX_ITEM_NAME_LENGTH}
                   onCommit={onAddItem}
-                  className="h-9 w-[220px] shrink-0 rounded-md border border-dashed border-[#d1d5db] px-3 text-sm transition-colors hover:border-[#9ca3af] hover:bg-white focus:border-[#9ca3af] focus:bg-white"
+                  className="h-9 w-[220px] shrink-0 rounded-md border-2 border-dashed border-accent/50 bg-panel px-3 text-[13px] font-medium transition-colors placeholder:text-accent hover:border-accent hover:bg-accent/5 focus:border-accent focus:bg-white"
                 />
                 <span className="text-xs text-dim tabular-nums">
                   {rows.length}/{maxItems}
@@ -237,20 +240,22 @@ function MobileRankingCards({
         </motion.article>
       ))}
 
-      <div className="rounded-[10px] border border-hairline bg-panel p-3">
+      <div className="rounded-[10px] border-2 border-dashed border-accent/50 bg-panel p-3 transition-colors hover:border-accent hover:bg-accent/5 focus-within:border-accent focus-within:bg-accent/5">
         {full ? (
           <p className="px-1 py-2 text-[13px] text-muted">
             Limit of {maxItems} — remove a {noun} to add another.
           </p>
         ) : (
           <div className="flex items-center gap-2.5">
-            <span className="flex size-8 shrink-0 items-center justify-center text-lg text-dim">+</span>
+            <span className="flex size-8 shrink-0 items-center justify-center text-lg text-accent">
+              +
+            </span>
             <EditableCell
               defaultValue=""
               placeholder={`Add a ${noun}…`}
               maxLength={MAX_ITEM_NAME_LENGTH}
               onCommit={onAddItem}
-              className="h-11 min-w-0 flex-1 rounded-md border border-dashed border-[#d1d5db] px-3 text-base transition-colors hover:border-[#9ca3af] focus:border-[#9ca3af] focus:bg-white"
+              className="h-11 min-w-0 flex-1 rounded-md px-3 text-base font-medium transition-colors placeholder:text-accent focus:bg-white"
             />
             <span className="shrink-0 text-xs text-dim tabular-nums">
               {rows.length}/{maxItems}

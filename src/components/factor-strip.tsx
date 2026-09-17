@@ -9,11 +9,12 @@ import { cn } from "@/lib/utils";
 
 const WEIGHT_LABELS = ["Negligible", "Minor", "Moderate", "Important", "Essential"] as const;
 
-const CARD = "h-[88px] w-[240px] shrink-0 rounded-[10px] box-border";
+const CARD =
+  "h-[112px] w-[min(82vw,280px)] shrink-0 rounded-[10px] box-border md:h-[88px] md:w-[240px]";
 
 /** Plain text at rest, an obviously-editable field once focused. */
 const TITLE_INPUT =
-  "-mx-2 -my-1 w-full rounded-md border border-transparent px-2 py-1 text-[14px] font-medium text-main placeholder:text-dim focus:border-accent focus:bg-white focus:shadow-[0_0_0_2px_var(--accent-ring)]";
+  "-mx-2 -my-1 w-full rounded-md border border-transparent px-2 py-2 text-[14px] font-medium text-main placeholder:text-dim focus:border-accent focus:bg-white focus:shadow-[0_0_0_2px_var(--accent-ring)] md:py-1";
 
 export function FactorStrip({
   factors,
@@ -35,7 +36,10 @@ export function FactorStrip({
   const full = factors.length >= maxFactors;
 
   return (
-    <section className="overflow-x-auto border-b border-hairline bg-page px-8 py-5">
+    <section
+      aria-label="Ranking factors"
+      className="overflow-x-auto border-b border-hairline bg-page px-4 py-4 sm:px-8 sm:py-5"
+    >
       <div className="flex min-w-min items-stretch gap-3">
         {factors.map((f) => (
           <FactorCard key={f.id} factor={f} onEdit={onEditFactor} onSetWeight={onSetWeight} onRemove={onRemoveFactor} />
@@ -119,7 +123,7 @@ function FactorCard({
           type="button"
           onClick={() => onRemove(factor.id)}
           aria-label={`Remove ${factor.text}`}
-          className="invisible -mt-0.5 -mr-0.5 flex size-5 shrink-0 items-center justify-center rounded text-dim transition-colors group-hover:visible hover:bg-red-100 hover:text-red-500"
+          className="-mt-1.5 -mr-1.5 flex size-8 shrink-0 items-center justify-center rounded-md text-dim transition-colors hover:bg-red-100 hover:text-red-500 md:invisible md:-mt-0.5 md:-mr-0.5 md:size-5 md:group-focus-within:visible md:group-hover:visible"
         >
           <X className="size-3.5" />
         </button>
@@ -131,8 +135,8 @@ function FactorCard({
 
 function WeightTrack({ weight, onChange }: { weight: number; onChange: (weight: number) => void }) {
   return (
-    <div className="flex items-center gap-2.5">
-      <div className="flex items-center gap-[3px]" role="group" aria-label={`Weight ${weight} of 5`}>
+    <div className="flex flex-col items-start gap-0.5 md:flex-row md:items-center md:gap-2.5">
+      <div className="flex w-full items-center gap-1 md:w-auto md:gap-[3px]" role="group" aria-label={`Weight ${weight} of 5`}>
         {[1, 2, 3, 4, 5].map((n) => (
           <button
             key={n}
@@ -144,10 +148,16 @@ function WeightTrack({ weight, onChange }: { weight: number; onChange: (weight: 
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => onChange(n)}
             className={cn(
-              "h-2 w-7 cursor-pointer rounded-[3px] transition-colors",
-              n <= weight ? "bg-accent" : "bg-hairline",
+              "flex h-9 flex-1 cursor-pointer items-center rounded-[3px] md:h-2 md:w-7 md:flex-none",
             )}
-          />
+          >
+            <span
+              className={cn(
+                "h-2 w-full rounded-[3px] transition-colors",
+                n <= weight ? "bg-accent" : "bg-hairline",
+              )}
+            />
+          </button>
         ))}
       </div>
       <span className="text-xs font-medium whitespace-nowrap text-muted">{WEIGHT_LABELS[weight - 1]}</span>

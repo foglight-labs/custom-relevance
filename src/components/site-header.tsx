@@ -6,24 +6,24 @@ export async function SiteHeader() {
   const stars = await getStarCount();
 
   return (
-    <header className="flex h-[52px] items-center justify-between border-b border-hairline bg-page px-8">
+    <header className="flex h-[56px] items-center justify-between gap-3 border-b border-hairline bg-page px-4 sm:h-[52px] sm:px-8">
       <a
         href="https://foglight.co"
-        className="inline-flex items-center gap-2.5 text-main transition-opacity hover:opacity-70"
+        className="inline-flex min-w-0 items-center gap-2.5 text-main transition-opacity hover:opacity-70"
       >
         <Image src="/foglight.svg" alt="Foglight" width={22} height={22} className="rounded-[5px]" />
-        <span className="text-[14px] font-semibold tracking-tight">Custom Relevance</span>
+        <span className="truncate text-[14px] font-semibold tracking-tight">Custom Relevance</span>
       </a>
 
       <a
         href={REPO_URL}
         target="_blank"
         rel="noreferrer"
-        className="inline-flex h-[34px] items-center gap-2 rounded-lg border border-hairline bg-panel px-3 text-[13.5px] font-medium text-main transition-colors hover:border-[#d8d2c7] hover:bg-soft"
+        className="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg border border-hairline bg-panel px-3 text-[13.5px] font-medium text-main transition-colors hover:border-[#d8d2c7] hover:bg-soft sm:h-[34px]"
         aria-label={stars === null ? "GitHub repository" : `GitHub repository, ${stars} stars`}
       >
         <GithubMark />
-        <span>GitHub</span>
+        <span className="hidden sm:inline">GitHub</span>
         {stars !== null && (
           <span className="inline-flex items-center gap-1 text-muted tabular-nums">
             <Star className="size-3.5" />

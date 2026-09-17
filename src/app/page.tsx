@@ -26,7 +26,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="relative z-50 flex h-[52px] items-center border-b border-hairline bg-page px-8">
+      <div className="relative z-50 flex min-h-[52px] items-center border-b border-hairline bg-page px-4 py-2 sm:px-8">
         <CollectionSwitcher
           collections={COLLECTIONS}
           collectionId={collectionId}

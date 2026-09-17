@@ -20,14 +20,14 @@ interface StoredState {
   scores: ScoreCache;
 }
 
-function storageKey(collectionId: string): string {
-  return `jev-ranking:${collectionId}`;
+function storageKey(collectionId: string, revision = 1): string {
+  return revision > 1 ? `jev-ranking:${collectionId}:r${revision}` : `jev-ranking:${collectionId}`;
 }
 
-function loadStored(collectionId: string): StoredState | null {
+function loadStored(collectionId: string, revision = 1): StoredState | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = window.localStorage.getItem(storageKey(collectionId));
+    const raw = window.localStorage.getItem(storageKey(collectionId, revision));
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<StoredState>;
     if (!Array.isArray(parsed.items) || !Array.isArray(parsed.factors)) return null;

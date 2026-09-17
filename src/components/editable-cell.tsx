@@ -56,10 +56,7 @@ export function EditableCell({
       onKeyDown={handleKeyDown}
       placeholder={placeholder}
       autoFocus={autoFocus}
-      className={cn(
-        "w-full min-w-0 bg-transparent text-sm text-neutral-900 outline-none placeholder:text-neutral-400",
-        className,
-      )}
+      className={cn("min-w-0 bg-transparent text-main outline-none placeholder:text-dim", className)}
     />
   );
 }

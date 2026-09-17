@@ -103,9 +103,16 @@ comfortably fits inside the Hobby plan's usage-based credit.
   (The `--import` registers `scripts/ts-extension-loader.mjs`, a small Node loader hook
   that lets this script import extensionless from `src/`, matching the rest of the
   codebase, under Node's native TS support.)
-- `src/components/sidebar.tsx` — the left panel: collection switcher, factor sheet
-  (weight + statement, editable in place), and a short status line.
-- `src/components/ranking-table.tsx` — the right panel: the live ranking, one column per
-  factor, reordering with a spring animation as scores come in.
+- `src/components/site-header.tsx` — the brand bar: the Foglight mark linking to
+  foglight.co, and a link to this repo with its star count from `src/lib/github.ts`
+  (fetched server-side, revalidated hourly, and simply omitted if GitHub can't be
+  reached).
+- `src/components/collection-switcher.tsx` — the collection chip and its dropdown.
+- `src/components/factor-strip.tsx` — the row of factor cards under the top bar: each
+  card is an editable statement plus a 5-segment weight track (1-5, labelled
+  Negligible → Essential), and the trailing dashed card adds one.
+- `src/components/ranking-table.tsx` — the ranking itself: medals for the top three, the
+  weighted total with its bar, one heat-mapped column per factor, and a trailing dashed
+  input to add an item. Rows reorder with a spring animation as scores come in.
 - `src/components/editable-cell.tsx` — the shared spreadsheet-style input used for both
   editing an existing value and adding a new row.

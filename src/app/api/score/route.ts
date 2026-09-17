@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { scoreCity, toErrorBody } from "@/lib/jev-client";
+import { scoreItem, toErrorBody } from "@/lib/jev-client";
 import type { ScoreRequestBody } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -8,10 +8,8 @@ function isValidBody(body: unknown): body is ScoreRequestBody {
   if (!body || typeof body !== "object") return false;
   const b = body as Record<string, unknown>;
   return (
-    typeof b.cityId === "string" &&
-    typeof b.cityName === "string" &&
-    typeof b.cityProfile === "string" &&
-    typeof b.query === "string" &&
+    typeof b.noun === "string" &&
+    typeof b.itemName === "string" &&
     Array.isArray(b.factors) &&
     b.factors.length > 0
   );
@@ -30,10 +28,10 @@ export async function POST(request: Request) {
   }
 
   try {
-    const result = await scoreCity(body, request.signal);
+    const result = await scoreItem(body, request.signal);
     return NextResponse.json(result);
   } catch (err) {
-    const errorBody = toErrorBody(body.cityId, err);
+    const errorBody = toErrorBody(body.itemName, err);
     const status =
       errorBody.code === "rate_limited"
         ? 429

@@ -1,137 +1,56 @@
 /**
- * Shared domain types for the Jev reranking playground.
+ * Shared domain types for the Jev ranking playground.
  *
- * A "factor" is one typed question sent to Jev (Score or Noul). Every enabled
- * factor becomes a column in the table; every city becomes a row. The raw
- * per-factor answers Jev returns are normalized to 0-1 in the browser and
- * combined with user-chosen weights to produce the final ranking. Jev never
- * sees the weights or the formula: it only ever answers one isolated question
- * per factor, exactly as the "composite scoring" pattern recommends.
+ * A "collection" is a set of items (e.g. cities) ranked against a set of
+ * factors. Each factor is one plain statement sent to Jev as an isolated
+ * yes/no question per item; the probability of "yes" becomes that cell's
+ * 0-100 value. Weights (1-5) and the final weighted average live entirely in
+ * this app, never in a prompt.
  */
 
-export type FactorKind = "score" | "noul";
+export interface Factor {
+  id: string;
+  /** The statement Jev is asked about each item, e.g. "Safe to walk at night". */
+  text: string;
+  /** 1 (barely matters) to 5 (matters a lot). */
+  weight: 1 | 2 | 3 | 4 | 5;
+}
 
-/** Whether a higher raw answer is good (safety) or bad (cost of living). */
-export type FactorDirection = "higher-is-better" | "lower-is-better";
-
-export interface ScoreCriterion {
-  /** Short label shown in tooltips/legends, e.g. "Very expensive". */
+export interface Collection {
+  id: string;
   label: string;
-}
-
-/**
- * A single factor definition: the question Jev is asked, independent of any
- * particular city. The same definition is reused for every row.
- */
-export interface FactorDef {
-  id: string;
-  /** Column header. */
-  title: string;
-  /** One-line description shown under the header / in the add-factor list. */
-  summary: string;
-  kind: FactorKind;
-  direction: FactorDirection;
-  /** The question text sent to Jev as `instructions`. */
-  instructions: string;
-  /** Score levels, low to high (only for kind: "score"). Min 2, max 10. */
-  levels?: ScoreCriterion[];
-  /** Noul true/false descriptions (only for kind: "noul"). */
-  noulCriteria?: { true: string; false: string };
-  /** Preset factors ship with the app; custom ones are user-authored this session. */
-  origin: "preset" | "custom" | "query";
-  /** Accent color used for the column header + weight chip. */
-  color: string;
-}
-
-/** Per-factor knobs the user controls entirely client-side. */
-export interface FactorWeightState {
-  factorId: string;
-  enabled: boolean;
-  /** 0-100 slider value. */
-  weight: number;
-}
-
-export interface City {
-  id: string;
-  name: string;
-  country: string;
-  flag: string;
-  population: string;
-  /** ~100-150 word neutral profile: the `state` Jev evaluates every factor against. */
-  profile: string;
-}
-
-/** Raw Jev answer for one (city, factor) cell, normalized for scoring. */
-export interface FactorAnswer {
-  factorId: string;
-  cityId: string;
-  kind: FactorKind;
-  /** Raw score (0..levels-1) or noul (0..1) as returned by Jev. */
-  raw: number;
-  confidence: number;
-  /** Probability distribution, keyed by level index (score) or "true"/"false" (noul). */
-  probabilities: Record<string, number>;
-  legend?: Record<string, string>;
-  /** Raw value normalized to 0-1, direction-adjusted. This is what the formula consumes. */
-  normalized: number;
+  /** Singular noun used in prompts and UI copy, e.g. "city". */
+  noun: string;
+  /** Default item names. */
+  items: string[];
+  /** Default factors. */
+  factors: Factor[];
 }
 
 export type CellStatus = "idle" | "loading" | "ready" | "error";
 
 export interface CellState {
   status: CellStatus;
-  answer?: FactorAnswer;
+  /** 0-100, only set once status is "ready". */
+  value?: number;
   error?: string;
 }
 
-export interface RowResult {
-  cityId: string;
-  status: CellStatus;
-  latencyMs?: number;
-  error?: string;
-  cells: Record<string, CellState>;
-  /** Weighted composite score, 0-1, once all enabled cells are ready. */
-  total: number | null;
-  rank: number | null;
-  baselineRank: number | null;
-}
-
-/** Payload shape sent from the client to /api/score for one city. */
-export interface ScoreRequestFactor {
-  id: string;
-  kind: FactorKind;
-  instructions: string;
-  levels?: string[];
-  noulCriteria?: { true: string; false: string };
-}
-
+/** Payload sent from the client to /api/score for one item. */
 export interface ScoreRequestBody {
-  cityId: string;
-  cityName: string;
-  cityProfile: string;
-  query: string;
-  factors: ScoreRequestFactor[];
+  noun: string;
+  itemName: string;
+  factors: { id: string; text: string }[];
 }
 
 export interface ScoreResponseBody {
-  cityId: string;
-  model: string;
-  latencyMs: number;
-  usage: { inputTokens: number; outputTokens: number };
-  answers: Record<
-    string,
-    {
-      kind: FactorKind;
-      raw: number;
-      confidence: number;
-      probabilities: Record<string, number>;
-      legend?: Record<string, string>;
-    }
-  >;
+  itemName: string;
+  /** factorId -> 0-100 value. */
+  answers: Record<string, number>;
 }
 
 export interface ScoreErrorBody {
-  cityId: string;
+  itemName: string;
   error: string;
   code: "rate_limited" | "overloaded" | "invalid" | "connection" | "unknown";
   retryAfterMs?: number;

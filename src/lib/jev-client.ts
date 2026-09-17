@@ -7,7 +7,7 @@ import {
   type Questions,
 } from "@typesafe-ai/sdk";
 import { COLLECTIONS } from "./collections";
-import { buildInstructions } from "./prompt";
+import { bareItemName, buildInstructions } from "./prompt";
 import type { ScoreErrorBody, ScoreRequestBody, ScoreResponseBody } from "./types";
 import { QuotaExceededError, usageBudget } from "./usage-budget";
 
@@ -49,7 +49,7 @@ export async function scoreItem(
     };
   }
 
-  const state: Record<string, string> = { [collection.noun]: body.itemName };
+  const state: Record<string, string> = { [collection.noun]: bareItemName(body.itemName) };
   if (collection.prompt.context) state.context = collection.prompt.context;
 
   usageBudget.reserve(ip);

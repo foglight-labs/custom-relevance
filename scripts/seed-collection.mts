@@ -13,7 +13,7 @@
  */
 import { TypeSafeClient, type Questions } from "@typesafe-ai/sdk";
 import { COLLECTIONS } from "../src/lib/collections";
-import { buildInstructions } from "../src/lib/prompt";
+import { bareItemName, buildInstructions } from "../src/lib/prompt";
 
 const collectionId = process.argv[2];
 if (!collectionId) {
@@ -45,7 +45,7 @@ async function main() {
         instructions: buildInstructions(collection!.prompt.template, itemName, f.text),
       };
     }
-    const state: Record<string, string> = { [collection!.noun]: itemName };
+    const state: Record<string, string> = { [collection!.noun]: bareItemName(itemName) };
     if (collection!.prompt.context) state.context = collection!.prompt.context;
 
     const result = await client.systemOne({ state, questions });

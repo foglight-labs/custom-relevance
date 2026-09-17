@@ -3,20 +3,20 @@ import type { Collection } from "../types";
 
 /**
  * Ten widely known websites spanning business models (ad-funded, subscription,
- * open/nonprofit), so "free", "privacy" and "useful for learning" each split
- * the set differently.
+ * open/nonprofit, AI), so "free", "privacy" and "useful for learning" each
+ * split the set differently. One product per company.
  */
 const ITEMS = [
-  "Wikipedia",
   "YouTube",
-  "Reddit",
-  "Amazon",
-  "GitHub",
+  "Instagram",
+  "Wikipedia",
+  "Claude",
+  "LinkedIn",
+  "ChatGPT",
   "Netflix",
-  "Craigslist",
-  "Stack Overflow",
-  "TikTok",
-  "BBC News",
+  "Reddit",
+  "X",
+  "Spotify",
 ];
 
 const FACTORS: Collection["factors"] = [
@@ -31,21 +31,22 @@ const FACTORS: Collection["factors"] = [
  * fresh, live answers instead.
  */
 const SEED_VALUES: Record<string, number[]> = {
-  Wikipedia: [94, 58, 95],
-  YouTube: [93, 41, 83],
-  Reddit: [94, 49, 64],
-  Amazon: [62, 50, 42],
-  GitHub: [83, 60, 86],
-  Netflix: [4, 60, 35],
-  Craigslist: [76, 45, 35],
-  "Stack Overflow": [91, 62, 92],
-  TikTok: [94, 38, 49],
-  "BBC News": [84, 73, 84],
+  YouTube: [92, 41, 83],
+  Instagram: [93, 51, 37],
+  Wikipedia: [93, 60, 94],
+  Claude: [49, 71, 57],
+  LinkedIn: [87, 62, 77],
+  ChatGPT: [67, 54, 75],
+  Netflix: [4, 61, 34],
+  Reddit: [94, 49, 63],
+  X: [74, 44, 38],
+  Spotify: [79, 63, 41],
 };
 
 export const websites: Collection = {
   id: "websites",
   label: "Websites",
+  defaultsRevision: 2,
   noun: "website",
   prompt: {
     template: 'Is this true of the website "{item}"? {factor}',

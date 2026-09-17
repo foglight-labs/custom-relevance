@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Star } from "lucide-react";
+import { HowItWorksButton } from "@/components/how-it-works-button";
 import { REPO_URL, formatStars, getStarCount } from "@/lib/github";
 
 export async function SiteHeader() {
@@ -15,22 +16,25 @@ export async function SiteHeader() {
         <span className="truncate text-[14px] font-semibold tracking-tight">Custom Relevance</span>
       </a>
 
-      <a
-        href={REPO_URL}
-        target="_blank"
-        rel="noreferrer"
-        className="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg border border-hairline bg-panel px-3 text-[13.5px] font-medium text-main transition-colors hover:border-[#d8d2c7] hover:bg-soft sm:h-[34px]"
-        aria-label={stars === null ? "GitHub repository" : `GitHub repository, ${stars} stars`}
-      >
-        <GithubMark />
-        <span className="hidden sm:inline">GitHub</span>
-        {stars !== null && (
-          <span className="inline-flex items-center gap-1 text-muted tabular-nums">
-            <Star className="size-3.5" />
-            {formatStars(stars)}
-          </span>
-        )}
-      </a>
+      <div className="flex shrink-0 items-center gap-2">
+        <a
+          href={REPO_URL}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg border border-hairline bg-panel px-3 text-[13.5px] font-medium text-main transition-colors hover:border-[#d8d2c7] hover:bg-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:h-[34px]"
+          aria-label={stars === null ? "GitHub repository" : `GitHub repository, ${stars} stars`}
+        >
+          <GithubMark />
+          <span className="hidden sm:inline">GitHub</span>
+          {stars !== null && (
+            <span className="inline-flex items-center gap-1 text-muted tabular-nums">
+              <Star className="size-3.5" />
+              {formatStars(stars)}
+            </span>
+          )}
+        </a>
+        <HowItWorksButton />
+      </div>
     </header>
   );
 }

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Inter_Tight } from "next/font/google";
+import { OnboardingDialog } from "@/components/onboarding-dialog";
+import { OnboardingProvider } from "@/components/onboarding-provider";
 import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
 
@@ -24,8 +26,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${inter.variable} ${interTight.variable} antialiased`}>
       <body>
-        <SiteHeader />
-        {children}
+        <OnboardingProvider>
+          <SiteHeader />
+          {children}
+          <OnboardingDialog />
+        </OnboardingProvider>
       </body>
     </html>
   );

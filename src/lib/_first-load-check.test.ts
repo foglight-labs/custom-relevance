@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { COLLECTIONS } from "./collections";
+import {
+  MAX_FACTORS,
+  MAX_FACTOR_TEXT_LENGTH,
+  MAX_ITEMS,
+  MAX_ITEM_NAME_LENGTH,
+} from "./limits";
 import { partitionCells } from "./score-cache";
 
 describe("first load (no localStorage yet)", () => {
@@ -12,6 +18,19 @@ describe("first load (no localStorage yet)", () => {
     ]);
     expect(Object.keys(misses)).toEqual([]);
     expect(hits.length).toBe(collection.items.length * collection.factors.length);
+  });
+
+  // A collection shipping more than the caps allow would be silently
+  // truncated on load, hiding items its seed scores already cover.
+  it.each(COLLECTIONS)("fits inside the grid caps for $label", (collection) => {
+    expect(collection.items.length).toBeLessThanOrEqual(MAX_ITEMS);
+    expect(collection.factors.length).toBeLessThanOrEqual(MAX_FACTORS);
+    for (const item of collection.items) {
+      expect(item.length).toBeLessThanOrEqual(MAX_ITEM_NAME_LENGTH);
+    }
+    for (const factor of collection.factors) {
+      expect(factor.text.length).toBeLessThanOrEqual(MAX_FACTOR_TEXT_LENGTH);
+    }
   });
 
   it("has a unique id, and a {item}/{factor} prompt template, for every collection", () => {

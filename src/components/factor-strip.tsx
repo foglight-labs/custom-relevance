@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { EditableCell } from "@/components/editable-cell";
+import { MAX_FACTOR_TEXT_LENGTH } from "@/lib/limits";
 import type { Factor } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -16,12 +17,14 @@ const TITLE_INPUT =
 
 export function FactorStrip({
   factors,
+  maxFactors,
   onAddFactor,
   onEditFactor,
   onSetWeight,
   onRemoveFactor,
 }: {
   factors: Factor[];
+  maxFactors: number;
   onAddFactor: (text: string, weight: number) => void;
   onEditFactor: (id: string, text: string) => void;
   onSetWeight: (id: string, weight: number) => void;
@@ -29,6 +32,7 @@ export function FactorStrip({
 }) {
   const [draftWeight, setDraftWeight] = useState(3);
   const [adding, setAdding] = useState(false);
+  const full = factors.length >= maxFactors;
 
   return (
     <section className="overflow-x-auto border-b border-hairline bg-page px-8 py-5">
@@ -37,13 +41,26 @@ export function FactorStrip({
           <FactorCard key={f.id} factor={f} onEdit={onEditFactor} onSetWeight={onSetWeight} onRemove={onRemoveFactor} />
         ))}
 
-        {adding ? (
+        {full ? (
+          <div
+            className={cn(
+              CARD,
+              "flex flex-col items-center justify-center gap-[3px] border-2 border-dashed border-hairline px-3 text-center",
+            )}
+          >
+            <span className="text-[13px] font-medium text-muted">
+              Limit of {maxFactors} factors
+            </span>
+            <span className="text-xs text-dim">Remove one to add another</span>
+          </div>
+        ) : adding ? (
           <div className={cn(CARD, "flex flex-col justify-between border border-hairline bg-panel p-3.5")}>
             <div className="flex h-[22px] items-start gap-2">
               <EditableCell
                 autoFocus
                 defaultValue=""
                 placeholder="Factor…"
+                maxLength={MAX_FACTOR_TEXT_LENGTH}
                 className={TITLE_INPUT}
                 onCommit={(text) => {
                   onAddFactor(text, draftWeight);
@@ -94,6 +111,7 @@ function FactorCard({
         <EditableCell
           key={factor.text}
           defaultValue={factor.text}
+          maxLength={MAX_FACTOR_TEXT_LENGTH}
           className={cn(TITLE_INPUT, "truncate")}
           onCommit={(text) => onEdit(factor.id, text)}
         />

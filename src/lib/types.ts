@@ -61,6 +61,8 @@ export interface CellState {
   /** 0-100, only set once status is "ready". */
   value?: number;
   error?: string;
+  /** Why it failed, so a hopeless retry (a spent quota) can be shown as such. */
+  code?: ScoreErrorBody["code"];
 }
 
 /** Payload sent from the client to /api/score for one item. */
@@ -80,6 +82,12 @@ export interface ScoreResponseBody {
 export interface ScoreErrorBody {
   itemName: string;
   error: string;
-  code: "rate_limited" | "overloaded" | "invalid" | "connection" | "unknown";
+  code:
+    | "rate_limited"
+    | "quota_exceeded"
+    | "overloaded"
+    | "invalid"
+    | "connection"
+    | "unknown";
   retryAfterMs?: number;
 }

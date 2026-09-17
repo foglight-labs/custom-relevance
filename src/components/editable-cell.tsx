@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 export function EditableCell({
   defaultValue,
   placeholder,
+  maxLength,
   onCommit,
   onDeleteWhenEmpty,
   className,
@@ -18,6 +19,7 @@ export function EditableCell({
 }: {
   defaultValue: string;
   placeholder?: string;
+  maxLength?: number;
   onCommit: (next: string) => void;
   onDeleteWhenEmpty?: () => void;
   className?: string;
@@ -55,6 +57,7 @@ export function EditableCell({
       onBlur={commit}
       onKeyDown={handleKeyDown}
       placeholder={placeholder}
+      maxLength={maxLength}
       autoFocus={autoFocus}
       className={cn("min-w-0 bg-transparent text-main outline-none placeholder:text-dim", className)}
     />

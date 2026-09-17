@@ -33,7 +33,7 @@ body {
   font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 14px;
   line-height: 1.4;
-  min-width: 1024px;
+  min-width: 0;
 }
 
 /* Score tiles that have no answer yet pulse between two paper tints. */
@@ -43,5 +43,16 @@ body {
   }
   100% {
     background-color: #e9e4dc;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

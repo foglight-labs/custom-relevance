@@ -35,13 +35,13 @@ export function CollectionSwitcher({
   }, [open]);
 
   return (
-    <div ref={anchorRef} className="relative">
+    <div ref={anchorRef} className="relative w-full sm:w-auto">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="inline-flex h-[34px] items-center gap-[7px] rounded-lg border border-hairline bg-panel px-3 text-[14px] font-semibold text-main transition-colors hover:border-[#d8d2c7] hover:bg-soft"
+        className="inline-flex h-10 w-full items-center justify-between gap-[7px] rounded-lg border border-hairline bg-panel px-3 text-[14px] font-semibold text-main transition-colors hover:border-[#d8d2c7] hover:bg-soft sm:h-[34px] sm:w-auto sm:justify-start"
       >
         <span>{current.label}</span>
         <ChevronDown className="size-3 stroke-[2]" />
@@ -50,7 +50,7 @@ export function CollectionSwitcher({
       {open && (
         <div
           role="listbox"
-          className="absolute left-0 top-[calc(100%+6px)] z-[100] flex w-[190px] flex-col gap-px rounded-lg border border-hairline bg-panel p-1 shadow-[0_8px_24px_rgba(0,0,0,0.08)]"
+          className="absolute top-[calc(100%+6px)] right-0 left-0 z-[100] flex flex-col gap-px rounded-lg border border-hairline bg-panel p-1 shadow-[0_8px_24px_rgba(0,0,0,0.08)] sm:right-auto sm:w-[190px]"
         >
           {collections.map((c) => {
             const selected = c.id === current.id;
@@ -65,7 +65,7 @@ export function CollectionSwitcher({
                   setOpen(false);
                 }}
                 className={cn(
-                  "flex h-[34px] items-center justify-between rounded-md px-2.5 text-left text-[13.5px] font-medium transition-colors",
+                  "flex min-h-10 items-center justify-between rounded-md px-2.5 text-left text-[13.5px] font-medium transition-colors sm:min-h-[34px]",
                   selected
                     ? "bg-accent/8 font-semibold text-accent"
                     : "text-[#44403c] hover:bg-soft hover:text-main",

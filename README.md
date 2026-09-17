@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Jev City Rerank Playground
 
-## Getting Started
+A one-page search-engine playtool built to show off [Jev](https://docs.typesafe.ai),
+TypeSafe's System One model. Ten hardcoded cities are scored live against factors you
+pick, in an Excel-like table with realistic wait/error states, then reranked whenever you
+type a search query.
 
-First, run the development server:
+## What it demonstrates
+
+- **Composite scoring** — every factor (Cost of Living, Safety, Nightlife, a custom
+  "Pet-Friendliness" question, ...) is one isolated Jev `Score` or `Noul` question. The
+  weights and the final formula live entirely in this app's code (see the `fx` bar), never
+  in a prompt.
+- **Per-query reranking** — typing a search intent adds a live "Query Match" `Noul`
+  column and reorders the table, with a ▲/▼ delta badge showing movement against a fixed
+  Cost-of-Living + Safety baseline.
+- **Wait / degraded states** — shimmering cells while a request is in flight, a dashed
+  amber outline on low-confidence answers (with a hover breakdown of the probability
+  distribution), and a red hatched retry state on failure.
+
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Put your key in `.env`:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+TYPESAFE_API_KEY=sk-...
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Run
 
-## Learn More
+```bash
+pnpm dev       # http://localhost:3000
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Validate
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm test      # vitest — scoring math (normalize, composite, ranking)
+pnpm lint      # eslint
+pnpm exec tsc --noEmit
+pnpm build     # production build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## How it's structured
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `src/lib/cities.ts` — the 10 hardcoded cities and their neutral profile text (the `state`
+  Jev evaluates).
+- `src/lib/factors.ts` — preset factor definitions (Score rubrics / Noul criteria).
+- `src/lib/scoring.ts` — pure functions: normalize a raw Jev answer to 0-1, compute the
+  weighted composite, rank rows, and format the `fx` formula string. Covered by
+  `scoring.test.ts`.
+- `src/lib/jev-client.ts` — server-only wrapper around `@typesafe-ai/sdk`'s `systemOne`.
+  One call per city, with every enabled factor asked as a parallel question.
+- `src/app/api/score/route.ts` — the only place the API key is used; the browser never
+  sees it.
+- `src/hooks/use-scoring-run.ts` — client state: factors, weights, per-cell cache
+  (factor answers persist across weight changes and are only refetched when a query or a
+  brand-new factor requires it), and the fetch orchestration with `AbortController`.
+- `src/components/` — `query-bar`, `formula-bar`, `factor-controls` (weights panel + add
+  factor dialog), `factor-table` (the spreadsheet), `score-cell` (per-cell states),
+  `status-bar`.

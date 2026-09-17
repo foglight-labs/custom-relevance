@@ -9,6 +9,7 @@ import {
 import { COLLECTIONS } from "./collections";
 import { buildInstructions } from "./prompt";
 import type { ScoreErrorBody, ScoreRequestBody, ScoreResponseBody } from "./types";
+import { QuotaExceededError, usageBudget } from "./usage-budget";
 
 let client: TypeSafeClient | null = null;
 
@@ -24,9 +25,13 @@ function getClient(): TypeSafeClient {
  * question. The instruction template and any extra context come from the
  * collection named by `body.collectionId` — the client never sends a prompt
  * string itself, only which collection it's asking about.
+ *
+ * Every call is charged against the shared key's daily budget, keyed by `ip`.
+ * @throws {QuotaExceededError} The budget for today is spent.
  */
 export async function scoreItem(
   body: ScoreRequestBody,
+  ip: string,
   signal?: AbortSignal,
 ): Promise<ScoreResponseBody> {
   // The route validates collectionId against COLLECTIONS before calling this;
@@ -47,10 +52,12 @@ export async function scoreItem(
   const state: Record<string, string> = { [collection.noun]: body.itemName };
   if (collection.prompt.context) state.context = collection.prompt.context;
 
+  usageBudget.reserve(ip);
   const result = await getClient().systemOne(
     { state, questions },
     signal ? { signal } : undefined,
   );
+  usageBudget.record(result.usage.input_tokens);
 
   const answers: ScoreResponseBody["answers"] = {};
   for (const f of body.factors) {
@@ -62,6 +69,9 @@ export async function scoreItem(
 }
 
 export function toErrorBody(itemName: string, err: unknown): ScoreErrorBody {
+  if (err instanceof QuotaExceededError) {
+    return { itemName, error: err.message, code: "quota_exceeded" };
+  }
   if (err instanceof RateLimitError) {
     return {
       itemName,

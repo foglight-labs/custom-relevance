@@ -2,6 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { COLLECTIONS } from "@/lib/collections";
+import {
+  clampText,
+  MAX_FACTORS,
+  MAX_FACTOR_TEXT_LENGTH,
+  MAX_ITEMS,
+  MAX_ITEM_NAME_LENGTH,
+} from "@/lib/limits";
 import { partitionCells, withScore } from "@/lib/score-cache";
 import { compositeScore, rankRows } from "@/lib/scoring";
 import type {
@@ -33,7 +40,14 @@ function loadStored(collectionId: string, revision = 1): StoredState | null {
     if (!Array.isArray(parsed.items) || !Array.isArray(parsed.factors)) return null;
     const scores =
       parsed.scores && typeof parsed.scores === "object" ? parsed.scores : {};
-    return { items: parsed.items, factors: parsed.factors, scores };
+    // Grids saved before (or over) the current caps are truncated rather than
+    // rehydrated in full, so an oversized grid can't fire a wave of requests
+    // the UI would no longer let you make.
+    return {
+      items: parsed.items.slice(0, MAX_ITEMS),
+      factors: parsed.factors.slice(0, MAX_FACTORS),
+      scores,
+    };
   } catch {
     return null;
   }
@@ -158,7 +172,9 @@ export function useRanking() {
         const json = await res.json();
         if (!res.ok) {
           const err = json as ScoreErrorBody;
-          for (const f of factorDefs) setCellStatus(itemName, f.id, { status: "error", error: err.error });
+          for (const f of factorDefs) {
+            setCellStatus(itemName, f.id, { status: "error", error: err.error, code: err.code });
+          }
           return;
         }
         const data = json as ScoreResponseBody;
@@ -228,9 +244,10 @@ export function useRanking() {
   /* eslint-enable react-hooks/set-state-in-effect */
 
   const addFactor = useCallback((text: string, weight: number) => {
-    const trimmed = text.trim();
+    const trimmed = clampText(text, MAX_FACTOR_TEXT_LENGTH);
     if (!trimmed) return;
     setFactors((prev) => {
+      if (prev.length >= MAX_FACTORS) return prev;
       if (prev.some((f) => f.text.toLowerCase() === trimmed.toLowerCase())) return prev;
       const id = makeFactorId(trimmed, prev.map((f) => f.id));
       return [...prev, { id, text: trimmed, weight: clampWeight(weight) }];
@@ -238,7 +255,7 @@ export function useRanking() {
   }, []);
 
   const editFactor = useCallback((id: string, text: string) => {
-    const trimmed = text.trim();
+    const trimmed = clampText(text, MAX_FACTOR_TEXT_LENGTH);
     if (!trimmed) return;
     setFactors((prev) => prev.map((f) => (f.id === id ? { ...f, text: trimmed } : f)));
     setCellsByItem((prev) => {
@@ -261,9 +278,10 @@ export function useRanking() {
   }, []);
 
   const addItem = useCallback((name: string) => {
-    const trimmed = name.trim();
+    const trimmed = clampText(name, MAX_ITEM_NAME_LENGTH);
     if (!trimmed) return;
     setItems((prev) => {
+      if (prev.length >= MAX_ITEMS) return prev;
       if (prev.some((n) => n.toLowerCase() === trimmed.toLowerCase())) return prev;
       return [...prev, trimmed];
     });
@@ -335,6 +353,8 @@ export function useRanking() {
     collectionId,
     setCollectionId,
     noun: collection.noun,
+    maxItems: MAX_ITEMS,
+    maxFactors: MAX_FACTORS,
     factors,
     addFactor,
     editFactor,

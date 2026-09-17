@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { EditableCell } from "@/components/editable-cell";
 import { Medal, isMedalRank } from "@/components/medal";
 import type { DisplayRow } from "@/hooks/use-ranking";
+import { MAX_ITEM_NAME_LENGTH } from "@/lib/limits";
 import type { CellState, Factor } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +17,7 @@ export function RankingTable({
   rows,
   factors,
   noun,
+  maxItems,
   onAddItem,
   onRemoveItem,
   onRetry,
@@ -23,12 +25,14 @@ export function RankingTable({
   rows: DisplayRow[];
   factors: Factor[];
   noun: string;
+  maxItems: number;
   onAddItem: (name: string) => void;
   onRemoveItem: (name: string) => void;
   onRetry: (name: string, factorId: string) => void;
 }) {
   const template = gridTemplate(factors.length);
   const nounCap = noun.charAt(0).toUpperCase() + noun.slice(1);
+  const full = rows.length >= maxItems;
 
   return (
     <main className="overflow-x-auto bg-page px-8 pt-6 pb-16">
@@ -90,14 +94,26 @@ export function RankingTable({
         ))}
 
         <div className="grid h-[60px] items-center" style={{ gridTemplateColumns: template }}>
-          <span className="text-center text-base text-dim">+</span>
-          <div className="pl-3">
-            <EditableCell
-              defaultValue=""
-              placeholder={`Add a ${noun}…`}
-              onCommit={onAddItem}
-              className="h-9 w-[220px] rounded-md border border-dashed border-[#d1d5db] px-3 text-sm transition-colors hover:border-[#9ca3af] hover:bg-white focus:border-[#9ca3af] focus:bg-white"
-            />
+          <span className="text-center text-base text-dim">{full ? "" : "+"}</span>
+          <div className="flex items-center gap-2.5 pl-3">
+            {full ? (
+              <span className="text-[13px] text-muted">
+                Limit of {maxItems} — remove a {noun} to add another.
+              </span>
+            ) : (
+              <>
+                <EditableCell
+                  defaultValue=""
+                  placeholder={`Add a ${noun}…`}
+                  maxLength={MAX_ITEM_NAME_LENGTH}
+                  onCommit={onAddItem}
+                  className="h-9 w-[220px] shrink-0 rounded-md border border-dashed border-[#d1d5db] px-3 text-sm transition-colors hover:border-[#9ca3af] hover:bg-white focus:border-[#9ca3af] focus:bg-white"
+                />
+                <span className="text-xs text-dim tabular-nums">
+                  {rows.length}/{maxItems}
+                </span>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -142,6 +158,18 @@ function Cell({ cell, onRetry }: { cell: CellState | undefined; onRetry: () => v
   }
 
   if (status === "error") {
+    // A spent budget won't clear until tomorrow, so offering a retry would
+    // only invite a click that can't work.
+    if (cell?.code === "quota_exceeded") {
+      return (
+        <div
+          title={cell.error ?? "The demo's daily Jev budget is used up."}
+          className={cn(TILE, "w-full border border-hairline bg-soft text-xs text-muted")}
+        >
+          Limit
+        </div>
+      );
+    }
     return (
       <button
         type="button"

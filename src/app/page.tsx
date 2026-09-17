@@ -11,6 +11,8 @@ export default function Home() {
     collectionId,
     setCollectionId,
     noun,
+    maxItems,
+    maxFactors,
     factors,
     addFactor,
     editFactor,
@@ -34,6 +36,7 @@ export default function Home() {
 
       <FactorStrip
         factors={factors}
+        maxFactors={maxFactors}
         onAddFactor={addFactor}
         onEditFactor={editFactor}
         onSetWeight={setWeight}
@@ -44,6 +47,7 @@ export default function Home() {
         rows={rows}
         factors={factors}
         noun={noun}
+        maxItems={maxItems}
         onAddItem={addItem}
         onRemoveItem={removeItem}
         onRetry={retryCell}

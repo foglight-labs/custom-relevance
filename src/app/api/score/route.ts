@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { COLLECTIONS } from "@/lib/collections";
 import { scoreItem, toErrorBody } from "@/lib/jev-client";
 import type { ScoreRequestBody } from "@/lib/types";
 
@@ -8,7 +9,8 @@ function isValidBody(body: unknown): body is ScoreRequestBody {
   if (!body || typeof body !== "object") return false;
   const b = body as Record<string, unknown>;
   return (
-    typeof b.noun === "string" &&
+    typeof b.collectionId === "string" &&
+    COLLECTIONS.some((c) => c.id === b.collectionId) &&
     typeof b.itemName === "string" &&
     Array.isArray(b.factors) &&
     b.factors.length > 0

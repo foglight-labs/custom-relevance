@@ -143,7 +143,7 @@ export function useRanking() {
       for (const f of factorDefs) setCellStatus(itemName, f.id, { status: "loading" });
 
       const body: ScoreRequestBody = {
-        noun: collection.noun,
+        collectionId,
         itemName,
         factors: factorDefs.map((f) => ({ id: f.id, text: f.text })),
       };
@@ -180,7 +180,7 @@ export function useRanking() {
         for (const f of factorDefs) setCellStatus(itemName, f.id, { status: "error", error: message });
       }
     },
-    [collection.noun, setCellStatus, clearCellStatus],
+    [collectionId, setCellStatus, clearCellStatus],
   );
 
   // Resolve any (item, factor) cell that has never been requested: from the

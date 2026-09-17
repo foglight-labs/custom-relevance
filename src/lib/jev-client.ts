@@ -6,6 +6,8 @@ import {
   TypeSafeClient,
   type Questions,
 } from "@typesafe-ai/sdk";
+import { COLLECTIONS } from "./collections";
+import { buildInstructions } from "./prompt";
 import type { ScoreErrorBody, ScoreRequestBody, ScoreResponseBody } from "./types";
 
 let client: TypeSafeClient | null = null;
@@ -17,21 +19,36 @@ function getClient(): TypeSafeClient {
   return client;
 }
 
-/** Calls Jev once per item, asking every factor as an isolated yes/no question. */
+/**
+ * Calls Jev once per item, asking every factor as an isolated yes/no
+ * question. The instruction template and any extra context come from the
+ * collection named by `body.collectionId` — the client never sends a prompt
+ * string itself, only which collection it's asking about.
+ */
 export async function scoreItem(
   body: ScoreRequestBody,
   signal?: AbortSignal,
 ): Promise<ScoreResponseBody> {
+  // The route validates collectionId against COLLECTIONS before calling this;
+  // this is just a defensive fallback, so a plain Error (-> "unknown" code) is fine.
+  const collection = COLLECTIONS.find((c) => c.id === body.collectionId);
+  if (!collection) {
+    throw new Error(`Unknown collection "${body.collectionId}"`);
+  }
+
   const questions: Questions = {};
   for (const f of body.factors) {
     questions[f.id] = {
       type: "noul",
-      instructions: `Is this true of the ${body.noun} "${body.itemName}"? ${f.text}`,
+      instructions: buildInstructions(collection.prompt.template, body.itemName, f.text),
     };
   }
 
+  const state: Record<string, string> = { [collection.noun]: body.itemName };
+  if (collection.prompt.context) state.context = collection.prompt.context;
+
   const result = await getClient().systemOne(
-    { state: { [body.noun]: body.itemName }, questions },
+    { state, questions },
     signal ? { signal } : undefined,
   );
 

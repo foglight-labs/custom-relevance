@@ -16,11 +16,29 @@ export interface Factor {
   weight: 1 | 2 | 3 | 4 | 5;
 }
 
+/**
+ * How a collection's (item, factor) pairs get turned into the instruction Jev
+ * is asked. Lives entirely in the collection's data file — the client only
+ * ever sends a collection id, never a prompt string, to /api/score.
+ */
+export interface CollectionPrompt {
+  /** Instruction template; "{item}" and "{factor}" are substituted per cell. */
+  template: string;
+  /**
+   * Extra framing added to the Jev call's state alongside the item itself,
+   * e.g. "Evaluate the club as it is today." Use for collections whose
+   * answers would otherwise drift with era or context.
+   */
+  context?: string;
+}
+
 export interface Collection {
   id: string;
   label: string;
   /** Singular noun used in prompts and UI copy, e.g. "city". */
   noun: string;
+  /** How this collection's cells are turned into a Jev instruction. */
+  prompt: CollectionPrompt;
   /** Default item names. */
   items: string[];
   /** Default factors. */
@@ -47,7 +65,8 @@ export interface CellState {
 
 /** Payload sent from the client to /api/score for one item. */
 export interface ScoreRequestBody {
-  noun: string;
+  /** Which collection's prompt template/context to use — never the template itself. */
+  collectionId: string;
   itemName: string;
   factors: { id: string; text: string }[];
 }

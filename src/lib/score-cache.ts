@@ -9,6 +9,22 @@ export function cacheKey(factorText: string): string {
   return factorText.trim().toLowerCase();
 }
 
+/**
+ * Builds a collection's `seedScores` from a plain items -> per-factor-value
+ * array, in the same order as `factors`. Keeps each category's data file
+ * free of the cache-key plumbing.
+ */
+export function buildSeedScores(factors: Factor[], values: Record<string, number[]>): ScoreCache {
+  return Object.fromEntries(
+    Object.entries(values).map(([itemName, itemValues]) => [
+      itemName,
+      Object.fromEntries(
+        factors.map((factor, i) => [cacheKey(factor.text), itemValues[i]]),
+      ),
+    ]),
+  );
+}
+
 /** Looks up a cached value for (item, factor text) across caches, first match wins. */
 export function lookupScore(
   caches: ScoreCache[],

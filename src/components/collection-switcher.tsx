@@ -41,7 +41,7 @@ export function CollectionSwitcher({
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="inline-flex h-10 w-full items-center justify-between gap-[7px] rounded-lg border border-hairline bg-panel px-3 text-[14px] font-semibold text-main transition-colors hover:border-[#d8d2c7] hover:bg-soft sm:h-[34px] sm:w-auto sm:justify-start"
+        className="inline-flex h-10 w-full cursor-pointer items-center justify-between gap-[7px] rounded-lg border border-hairline bg-panel px-3 text-[14px] font-semibold text-main transition-colors hover:border-[#d8d2c7] hover:bg-soft sm:h-[34px] sm:w-auto sm:justify-start"
       >
         <span>{current.label}</span>
         <ChevronDown className="size-3 stroke-[2]" />
@@ -65,7 +65,7 @@ export function CollectionSwitcher({
                   setOpen(false);
                 }}
                 className={cn(
-                  "flex min-h-10 items-center justify-between rounded-md px-2.5 text-left text-[13.5px] font-medium transition-colors sm:min-h-[34px]",
+                  "flex min-h-10 cursor-pointer items-center justify-between rounded-md px-2.5 text-left text-[13.5px] font-medium transition-colors sm:min-h-[34px]",
                   selected
                     ? "bg-accent/8 font-semibold text-accent"
                     : "text-[#44403c] hover:bg-soft hover:text-main",

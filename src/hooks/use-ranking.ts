@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { COLLECTIONS } from "@/lib/collections";
+import { partitionCells, withScore } from "@/lib/score-cache";
 import { compositeScore, rankRows } from "@/lib/scoring";
 import type {
   CellState,
   Factor,
+  ScoreCache,
   ScoreErrorBody,
   ScoreRequestBody,
   ScoreResponseBody,
@@ -14,6 +16,8 @@ import type {
 interface StoredState {
   items: string[];
   factors: Factor[];
+  /** Every score ever fetched for this collection, so reloads don't refetch. */
+  scores: ScoreCache;
 }
 
 function storageKey(collectionId: string): string {
@@ -27,7 +31,9 @@ function loadStored(collectionId: string): StoredState | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<StoredState>;
     if (!Array.isArray(parsed.items) || !Array.isArray(parsed.factors)) return null;
-    return { items: parsed.items, factors: parsed.factors };
+    const scores =
+      parsed.scores && typeof parsed.scores === "object" ? parsed.scores : {};
+    return { items: parsed.items, factors: parsed.factors, scores };
   } catch {
     return null;
   }
@@ -81,24 +87,35 @@ export function useRanking() {
 
   const [items, setItems] = useState<string[]>(collection.items);
   const [factors, setFactors] = useState<Factor[]>(collection.factors);
+  const [scores, setScores] = useState<ScoreCache>({});
   const [cellsByItem, setCellsByItem] = useState<Record<string, Record<string, CellState>>>({});
+  // Which collectionId's storage has actually been loaded into items/factors/
+  // scores above. Until this matches collectionId, the fetch and save effects
+  // below stay out of the way, so they never see the initial-render defaults
+  // and mistake them for "the user's real data" (which would otherwise fire a
+  // wasted fetch wave, or overwrite storage, before the load effect runs).
+  const [hydratedFor, setHydratedFor] = useState<string | null>(null);
 
-  // Swap in persisted (or default) items/factors whenever the collection changes.
-  // Reads localStorage, so it must stay client-only (an effect) rather than
-  // computed during render, to avoid a server/client hydration mismatch.
+  // Swap in persisted (or default) items/factors/scores whenever the
+  // collection changes. Reads localStorage, so it must stay client-only (an
+  // effect) rather than computed during render, to avoid a server/client
+  // hydration mismatch.
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     const stored = loadStored(collectionId);
     const base = COLLECTIONS.find((c) => c.id === collectionId) ?? COLLECTIONS[0];
     setItems(stored?.items ?? base.items);
     setFactors(stored?.factors ?? base.factors);
+    setScores(stored?.scores ?? {});
     setCellsByItem({});
+    setHydratedFor(collectionId);
   }, [collectionId]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
-    saveStored(collectionId, { items, factors });
-  }, [collectionId, items, factors]);
+    if (hydratedFor !== collectionId) return;
+    saveStored(collectionId, { items, factors, scores });
+  }, [collectionId, hydratedFor, items, factors, scores]);
 
   const setCellStatus = useCallback((itemName: string, factorId: string, cell: CellState) => {
     setCellsByItem((prev) => ({
@@ -152,6 +169,7 @@ export function useRanking() {
             continue;
           }
           setCellStatus(itemName, f.id, { status: "ready", value });
+          setScores((prev) => withScore(prev, itemName, f.text, value));
         }
       } catch (err) {
         if (signal.aborted) {
@@ -165,27 +183,48 @@ export function useRanking() {
     [collection.noun, setCellStatus, clearCellStatus],
   );
 
-  // Fetch any (item, factor) cell that has never been requested. Cells that
-  // already errored are left alone until the user retries them explicitly.
-  // The cleanup aborts this batch's still-in-flight requests: React (in
+  // Resolve any (item, factor) cell that has never been requested: from the
+  // score cache (persisted scores, falling back to the collection's seed
+  // data) when available, otherwise from a live request. Cells that already
+  // errored are left alone until the user retries them explicitly. The
+  // cleanup aborts this batch's still-in-flight requests: React (in
   // development, via Strict Mode) can invoke an effect, clean it up, and
   // re-invoke it right away, and without this every add/edit would fire two
   // overlapping waves of fetches.
-  // fetchOne marks cells "loading" synchronously before its first await, which
-  // this rule reads as a setState-in-effect; that immediate feedback is intended.
+  // Applying cache hits, and fetchOne marking cells "loading" synchronously
+  // before its first await, are both read by this rule as setState-in-effect;
+  // that immediate feedback (skip the request, or show a spinner) is intended.
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
+    if (hydratedFor !== collectionId) return;
+    const { hits, misses } = partitionCells(items, factors, cellsByItem, [
+      scores,
+      collection.seedScores ?? {},
+    ]);
+
+    if (hits.length > 0) {
+      setCellsByItem((prev) => {
+        const next = { ...prev };
+        for (const hit of hits) {
+          next[hit.itemName] = {
+            ...(next[hit.itemName] ?? {}),
+            [hit.factorId]: { status: "ready", value: hit.value },
+          };
+        }
+        return next;
+      });
+    }
+
     const controller = new AbortController();
-    for (const itemName of items) {
-      const existing = cellsByItem[itemName] ?? {};
-      const missing = factors.filter((f) => !existing[f.id]);
-      if (missing.length > 0) void fetchOne(itemName, missing, controller.signal);
+    for (const [itemName, missingFactors] of Object.entries(misses)) {
+      void fetchOne(itemName, missingFactors, controller.signal);
     }
     return () => controller.abort();
-    // cellsByItem is read for the "already fetched?" check, not to decide
-    // when to re-run — only a new item or factor should trigger a fetch.
+    // cellsByItem and scores are read for the "already resolved?" check, not
+    // to decide when to re-run — only a new item or factor (or the collection
+    // finishing hydration) should trigger this.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items, factors, fetchOne]);
+  }, [items, factors, hydratedFor, collectionId, collection.seedScores, fetchOne]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
   const addFactor = useCallback((text: string, weight: number) => {

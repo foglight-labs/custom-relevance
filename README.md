@@ -57,7 +57,14 @@ pnpm build     # production build
   sees it.
 - `src/hooks/use-ranking.ts` — client state: items, factors, per-cell cache, persisted to
   `localStorage` per collection. Adding an item or a factor fetches only the new cells;
-  editing a factor's text re-fetches just that column.
+  editing a factor's text re-fetches just that column. Every resolved score is cached
+  (keyed by item + factor *text*) and saved alongside items/factors, so reloading the page
+  or switching collections never re-asks a question it already has an answer for; a
+  collection can also ship `seedScores` (see `collections.ts`) so its defaults render with
+  zero requests on a first visit. The explicit per-cell retry always re-asks live.
+- `src/lib/score-cache.ts` — pure helpers for that cache: normalizing a factor's text into
+  a cache key, and splitting an (items × factors) grid into cells already answered
+  (cache hit) versus cells that still need a live request.
 - `src/components/sidebar.tsx` — the left panel: collection switcher, factor sheet
   (weight + statement, editable in place), and a short status line.
 - `src/components/ranking-table.tsx` — the right panel: the live ranking, one column per

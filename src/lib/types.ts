@@ -25,7 +25,16 @@ export interface Collection {
   items: string[];
   /** Default factors. */
   factors: Factor[];
+  /**
+   * Precomputed scores for the default items/factors, so a first-time visitor
+   * sees the default ranking without sending a single /api/score request.
+   * Keyed by factor text (not id) since the text is what was actually asked.
+   */
+  seedScores?: ScoreCache;
 }
+
+/** item name -> factor text -> 0-100 value. Keyed by text, not id: the text is the question. */
+export type ScoreCache = Record<string, Record<string, number>>;
 
 export type CellStatus = "idle" | "loading" | "ready" | "error";
 

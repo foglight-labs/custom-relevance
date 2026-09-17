@@ -35,6 +35,11 @@ export interface CollectionPrompt {
 export interface Collection {
   id: string;
   label: string;
+  /**
+   * Bump this when default items/factors change so existing localStorage
+   * (which would otherwise hide the new defaults) is ignored.
+   */
+  defaultsRevision?: number;
   /** Singular noun used in prompts and UI copy, e.g. "city". */
   noun: string;
   /** How this collection's cells are turned into a Jev instruction. */

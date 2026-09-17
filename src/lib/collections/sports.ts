@@ -2,20 +2,21 @@ import { buildSeedScores } from "../score-cache";
 import type { Collection } from "../types";
 
 /**
- * Ten sports spanning cost, contact and cardio demand, so each factor below
- * splits the set differently.
+ * Ten sports that each have a dedicated ball/equipment emoji, spanning cost,
+ * contact and cardio demand so each factor below splits the set differently.
+ * Jev is asked about the bare sport name (see `bareItemName`).
  */
 const ITEMS = [
-  "Football",
-  "Basketball",
-  "Tennis",
-  "Golf",
-  "Swimming",
-  "Chess",
-  "Boxing",
-  "Formula 1",
-  "Cricket",
-  "Rock Climbing",
+  "⚽ Football",
+  "🏀 Basketball",
+  "🏈 American football",
+  "⚾ Baseball",
+  "🎾 Tennis",
+  "🏐 Volleyball",
+  "🏉 Rugby",
+  "🏏 Cricket",
+  "⛳ Golf",
+  "🥊 Boxing",
 ];
 
 const FACTORS: Collection["factors"] = [
@@ -30,21 +31,22 @@ const FACTORS: Collection["factors"] = [
  * one) to get fresh, live answers instead.
  */
 const SEED_VALUES: Record<string, number[]> = {
-  Football: [75, 16, 75],
-  Basketball: [68, 22, 76],
-  Tennis: [42, 30, 83],
-  Golf: [30, 65, 26],
-  Swimming: [61, 55, 95],
-  Chess: [89, 95, 5],
-  Boxing: [50, 7, 87],
-  "Formula 1": [6, 13, 46],
-  Cricket: [58, 36, 54],
-  "Rock Climbing": [35, 18, 66],
+  "⚽ Football": [73, 15, 75],
+  "🏀 Basketball": [66, 23, 72],
+  "🏈 American football": [29, 7, 34],
+  "⚾ Baseball": [56, 28, 44],
+  "🎾 Tennis": [43, 30, 82],
+  "🏐 Volleyball": [71, 46, 71],
+  "🏉 Rugby": [49, 9, 74],
+  "🏏 Cricket": [58, 38, 53],
+  "⛳ Golf": [27, 62, 26],
+  "🥊 Boxing": [46, 7, 87],
 };
 
 export const sports: Collection = {
   id: "sports",
   label: "Sports",
+  defaultsRevision: 2,
   noun: "sport",
   prompt: {
     template: 'Is this true of the sport "{item}"? {factor}',

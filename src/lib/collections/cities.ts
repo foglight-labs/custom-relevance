@@ -2,22 +2,22 @@ import { buildSeedScores } from "../score-cache";
 import type { Collection } from "../types";
 
 /**
- * Ten hardcoded cities, deliberately spread across cost, safety and climate
- * so that changing factors/weights actually reshuffles the ranking. Jev is
- * asked about each one by name only — no profile text, it relies on its own
- * knowledge of the city.
+ * Ten cities, each prefixed with its national flag for the table. Jev is
+ * asked about the bare city name (see `bareItemName`) — no profile text, it
+ * relies on its own knowledge of the city. Spread across cost, safety and
+ * climate so that changing factors/weights actually reshuffles the ranking.
  */
 const ITEMS = [
-  "Yerevan",
-  "Tbilisi",
-  "Lisbon",
-  "Tokyo",
-  "Mexico City",
-  "Reykjavik",
-  "Nairobi",
-  "Melbourne",
-  "Prague",
-  "Buenos Aires",
+  "🇦🇲 Yerevan",
+  "🇺🇸 San Francisco",
+  "🇬🇧 London",
+  "🇪🇸 Barcelona",
+  "🇳🇱 Amsterdam",
+  "🇵🇹 Porto",
+  "🇺🇾 Montevideo",
+  "🇮🇹 Rome",
+  "🇸🇬 Singapore",
+  "🇦🇪 Dubai",
 ];
 
 const FACTORS: Collection["factors"] = [
@@ -34,21 +34,22 @@ const FACTORS: Collection["factors"] = [
  * answers instead.
  */
 const SEED_VALUES: Record<string, number[]> = {
-  Yerevan: [70, 62, 53],
-  Tbilisi: [71, 56, 53],
-  Lisbon: [46, 59, 81],
-  Tokyo: [12, 76, 32],
-  "Mexico City": [55, 31, 45],
-  Reykjavik: [16, 82, 5],
-  Nairobi: [55, 26, 69],
-  Melbourne: [23, 55, 33],
-  Prague: [53, 68, 17],
-  "Buenos Aires": [51, 36, 47],
+  "🇦🇲 Yerevan": [68, 62, 54],
+  "🇺🇸 San Francisco": [5, 41, 39],
+  "🇬🇧 London": [12, 58, 16],
+  "🇪🇸 Barcelona": [32, 58, 82],
+  "🇳🇱 Amsterdam": [21, 69, 18],
+  "🇵🇹 Porto": [62, 65, 46],
+  "🇺🇾 Montevideo": [51, 50, 59],
+  "🇮🇹 Rome": [30, 50, 64],
+  "🇸🇬 Singapore": [11, 82, 86],
+  "🇦🇪 Dubai": [14, 75, 94],
 };
 
 export const cities: Collection = {
   id: "cities",
   label: "Cities",
+  defaultsRevision: 2,
   noun: "city",
   prompt: {
     template: 'Is this true of the city "{item}"? {factor}',

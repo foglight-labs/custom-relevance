@@ -2,20 +2,21 @@ import { buildSeedScores } from "../score-cache";
 import type { Collection } from "../types";
 
 /**
- * Ten dishes spanning cuisines and cook times, so "quick to cook", "healthy"
- * and "spicy" each split the set differently.
+ * Ten dishes with a distinct food emoji each, spanning cuisines so "quick to
+ * cook", "healthy" and "spicy" each split the set differently. Jev is asked
+ * about the bare dish name (see `bareItemName`).
  */
 const ITEMS = [
-  "Pad Thai",
-  "Margherita Pizza",
-  "Sushi",
-  "Beef Wellington",
-  "Khachapuri",
-  "Pho",
-  "Tacos al Pastor",
-  "Ratatouille",
-  "Biryani",
-  "Caesar Salad",
+  "🍕 Pizza",
+  "🍔 Burger",
+  "🍣 Sushi",
+  "🌮 Tacos",
+  "🍜 Ramen",
+  "🍝 Pasta",
+  "🥗 Salad",
+  "🥟 Dumplings",
+  "🍛 Curry",
+  "🥩 Steak",
 ];
 
 const FACTORS: Collection["factors"] = [
@@ -30,21 +31,22 @@ const FACTORS: Collection["factors"] = [
  * live answers instead.
  */
 const SEED_VALUES: Record<string, number[]> = {
-  "Pad Thai": [54, 16, 26],
-  "Margherita Pizza": [61, 25, 7],
-  Sushi: [31, 68, 23],
-  "Beef Wellington": [7, 5, 9],
-  Khachapuri: [37, 11, 14],
-  Pho: [21, 38, 25],
-  "Tacos al Pastor": [41, 11, 57],
-  Ratatouille: [29, 84, 14],
-  Biryani: [13, 10, 65],
-  "Caesar Salad": [63, 35, 9],
+  "🍕 Pizza": [48, 12, 31],
+  "🍔 Burger": [68, 11, 24],
+  "🍣 Sushi": [30, 68, 24],
+  "🌮 Tacos": [70, 20, 46],
+  "🍜 Ramen": [57, 12, 34],
+  "🍝 Pasta": [62, 21, 22],
+  "🥗 Salad": [61, 85, 18],
+  "🥟 Dumplings": [60, 24, 26],
+  "🍛 Curry": [36, 17, 75],
+  "🥩 Steak": [52, 16, 17],
 };
 
 export const dishes: Collection = {
   id: "dishes",
   label: "Dishes",
+  defaultsRevision: 2,
   noun: "dish",
   prompt: {
     template: 'Is this true of the dish "{item}"? {factor}',

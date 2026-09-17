@@ -53,10 +53,10 @@ function loadStored(collectionId: string, revision = 1): StoredState | null {
   }
 }
 
-function saveStored(collectionId: string, state: StoredState) {
+function saveStored(collectionId: string, state: StoredState, revision = 1) {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(storageKey(collectionId), JSON.stringify(state));
+    window.localStorage.setItem(storageKey(collectionId, revision), JSON.stringify(state));
   } catch {
     // localStorage unavailable (private mode, quota) — state just won't persist.
   }
@@ -116,8 +116,8 @@ export function useRanking() {
   // hydration mismatch.
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
-    const stored = loadStored(collectionId);
     const base = COLLECTIONS.find((c) => c.id === collectionId) ?? COLLECTIONS[0];
+    const stored = loadStored(collectionId, base.defaultsRevision);
     setItems(stored?.items ?? base.items);
     setFactors(stored?.factors ?? base.factors);
     setScores(stored?.scores ?? {});
@@ -128,8 +128,8 @@ export function useRanking() {
 
   useEffect(() => {
     if (hydratedFor !== collectionId) return;
-    saveStored(collectionId, { items, factors, scores });
-  }, [collectionId, hydratedFor, items, factors, scores]);
+    saveStored(collectionId, { items, factors, scores }, collection.defaultsRevision);
+  }, [collectionId, hydratedFor, items, factors, scores, collection.defaultsRevision]);
 
   const setCellStatus = useCallback((itemName: string, factorId: string, cell: CellState) => {
     setCellsByItem((prev) => ({

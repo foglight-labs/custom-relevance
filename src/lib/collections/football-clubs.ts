@@ -2,22 +2,22 @@ import { buildSeedScores } from "../score-cache";
 import type { Collection } from "../types";
 
 /**
- * Ten football clubs spanning trophy history, youth development reputation
- * and playing style, so each factor below splits the set differently.
- * `prompt.context` pins answers to the present day, since a club's identity
- * (squad, manager, style) drifts season to season.
+ * Ten widely known football clubs spanning trophy history, youth development
+ * reputation and playing style, so each factor below splits the set
+ * differently. `prompt.context` pins answers to the present day, since a
+ * club's identity (squad, manager, style) drifts season to season.
  */
 const ITEMS = [
   "Real Madrid",
-  "Manchester City",
+  "Barcelona",
+  "Manchester United",
+  "Liverpool",
   "Bayern Munich",
-  "Ajax",
-  "Boca Juniors",
-  "Celtic",
-  "Athletic Bilbao",
-  "Paris Saint-Germain",
-  "Borussia Dortmund",
-  "Inter Miami",
+  "Juventus",
+  "PSG",
+  "Chelsea",
+  "Arsenal",
+  "AC Milan",
 ];
 
 const FACTORS: Collection["factors"] = [
@@ -32,21 +32,22 @@ const FACTORS: Collection["factors"] = [
  * get fresh, live answers instead.
  */
 const SEED_VALUES: Record<string, number[]> = {
-  "Real Madrid": [98, 44, 76],
-  "Manchester City": [84, 34, 92],
-  "Bayern Munich": [97, 38, 80],
-  Ajax: [95, 92, 84],
-  "Boca Juniors": [96, 80, 52],
-  Celtic: [96, 59, 74],
-  "Athletic Bilbao": [66, 96, 50],
-  "Paris Saint-Germain": [81, 17, 78],
-  "Borussia Dortmund": [80, 81, 81],
-  "Inter Miami": [12, 20, 63],
+  "Real Madrid": [98, 44, 77],
+  Barcelona: [97, 87, 85],
+  "Manchester United": [97, 57, 48],
+  Liverpool: [97, 53, 82],
+  "Bayern Munich": [97, 39, 80],
+  Juventus: [97, 40, 45],
+  PSG: [73, 18, 76],
+  Chelsea: [94, 33, 53],
+  Arsenal: [95, 65, 78],
+  "AC Milan": [96, 43, 65],
 };
 
 export const footballClubs: Collection = {
   id: "football-clubs",
   label: "Football Clubs",
+  defaultsRevision: 2,
   noun: "football club",
   prompt: {
     template: 'Is this true of the football club "{item}"? {factor}',

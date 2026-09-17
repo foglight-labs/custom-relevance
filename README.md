@@ -7,3 +7,5 @@
 A ranking playground. Type a list of things and a few plain-language factors, and Jev scores every pair live into a weighted ranking.
 
 [jev.foglight.co](https://jev.foglight.co)
+
+Scores come from Jev via [TypeSafe](https://typesafe.ai)’s System One API.

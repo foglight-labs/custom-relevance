@@ -35,7 +35,7 @@ export function RankingTable({
   const full = rows.length >= maxItems;
 
   return (
-    <main className="flex-1 overflow-x-auto bg-page px-8 pt-6 pb-8">
+    <main className="overflow-x-auto bg-page px-8 pt-6 pb-16">
       <div className="min-w-[960px] overflow-hidden rounded-[10px] border border-hairline bg-panel">
         <div
           className="grid h-[34px] items-center border-b border-hairline text-[13px] font-medium text-muted select-none"

@@ -15,7 +15,7 @@ const FOCUSABLE_SELECTOR = [
 ].join(",");
 
 export function OnboardingDialog() {
-  const { isOpen, dismissOnboarding } = useOnboarding();
+  const { variant, isOpen, dismissOnboarding } = useOnboarding();
   const reduceMotion = useReducedMotion();
   const dialogRef = useRef<HTMLElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -142,9 +142,19 @@ export function OnboardingDialog() {
             </header>
 
             <div className="grid overscroll-contain overflow-y-auto px-5 py-6 md:grid-cols-2 md:px-7 md:py-8">
-              <IntroSection />
-              <FactorSection />
-              <OptionSection />
+              {variant === "map" ? (
+                <>
+                  <MapIntroSection />
+                  <MapFactorSection />
+                  <MapReadSection />
+                </>
+              ) : (
+                <>
+                  <IntroSection />
+                  <FactorSection />
+                  <OptionSection />
+                </>
+              )}
             </div>
           </motion.section>
         </motion.div>
@@ -247,6 +257,95 @@ function OptionIllustration() {
       <div className="mt-2 flex h-6 items-center gap-2 rounded-[5px] border border-dashed border-accent/45 px-1.5">
         <span className="text-[13px] leading-none text-accent">+</span>
         <span className="h-1.5 w-12 rounded-full bg-[#d7e7e2]" />
+      </div>
+    </div>
+  );
+}
+
+function MapIntroSection() {
+  return (
+    <section className="flex min-w-0 flex-col items-start gap-4 pb-6 md:col-span-2 md:flex-row md:items-center md:gap-6 md:pb-7">
+      <MapIllustration />
+      <p className="max-w-[600px] font-display text-[19px] leading-[1.3] font-semibold tracking-[-0.01em] text-main">
+        The map scores every country in the world on any factor you type.
+      </p>
+    </section>
+  );
+}
+
+function MapFactorSection() {
+  return (
+    <section className="flex min-w-0 items-center gap-4 border-t border-[#d7e7e2] py-6 md:flex-col md:items-center md:pr-7 md:pt-7 md:pb-0 md:text-center lg:pr-9">
+      <MapFactorIllustration />
+      <div className="min-w-0">
+        <h3 className="font-display text-[16px] font-semibold text-main">Type a factor</h3>
+        <p className="mt-1 max-w-[230px] text-[13px] leading-[1.45] text-muted">
+          Anything from street food to internet speed. Jev scores all countries in one go.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function MapReadSection() {
+  return (
+    <section className="flex min-w-0 items-center gap-4 border-t border-[#d7e7e2] pt-6 md:flex-col md:items-center md:border-l md:pl-7 md:pt-7 md:text-center lg:pl-9">
+      <LegendIllustration />
+      <div className="min-w-0">
+        <h3 className="font-display text-[16px] font-semibold text-main">Read the map</h3>
+        <p className="mt-1 max-w-[230px] text-[13px] leading-[1.45] text-muted">
+          Red is lowest, green is highest. Hover or tap a country for its score.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function MapIllustration() {
+  const cells = ["#d73027", "#fc8d59", "#fee08b", "#d9ef8b", "#91cf60", "#1a9850"];
+  return (
+    <div
+      aria-hidden="true"
+      className="grid h-[76px] w-[112px] shrink-0 grid-cols-6 content-center gap-1 rounded-[10px] border border-[#cfe1dc] bg-white p-3 shadow-[0_4px_14px_rgba(15,118,110,0.07)]"
+    >
+      {[3, 5, 1, 4, 2, 0, 4, 0, 5, 2, 3, 1, 1, 4, 2, 5, 0, 3].map((shade, index) => (
+        <span key={index} className="h-3 rounded-[2px]" style={{ backgroundColor: cells[shade] }} />
+      ))}
+    </div>
+  );
+}
+
+function MapFactorIllustration() {
+  return (
+    <div
+      aria-hidden="true"
+      className="flex h-[76px] w-[112px] shrink-0 flex-col justify-center gap-2 rounded-[10px] border border-[#cfe1dc] bg-white p-3"
+    >
+      <div className="flex h-6 items-center rounded-[5px] border border-accent/60 px-1.5 shadow-[0_0_0_2px_var(--accent-ring)]">
+        <span className="h-1.5 w-12 rounded-full bg-[#b8d7cf]" />
+        <span className="ml-0.5 h-3 w-px bg-accent" />
+      </div>
+      <div className="flex gap-1">
+        <span className="h-2.5 w-8 rounded-full border border-hairline" />
+        <span className="h-2.5 w-10 rounded-full border border-hairline" />
+      </div>
+    </div>
+  );
+}
+
+function LegendIllustration() {
+  return (
+    <div
+      aria-hidden="true"
+      className="flex h-[76px] w-[112px] shrink-0 flex-col justify-center gap-1.5 rounded-[10px] border border-[#cfe1dc] bg-white p-3"
+    >
+      <span
+        className="h-2 w-full rounded-full"
+        style={{ background: "linear-gradient(to right, #d73027, #fee08b, #1a9850)" }}
+      />
+      <div className="flex justify-between">
+        <span className="h-1.5 w-6 rounded-full bg-[#e6e1d8]" />
+        <span className="h-1.5 w-6 rounded-full bg-[#e6e1d8]" />
       </div>
     </div>
   );

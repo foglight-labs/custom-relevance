@@ -7,8 +7,17 @@ import {
   type Questions,
 } from "@typesafe-ai/sdk";
 import { COLLECTIONS } from "./collections";
+import { COUNTRIES } from "./map/countries";
+import { buildQuestions, buildState, parseAnswers } from "./map/questions";
 import { bareItemName, buildInstructions } from "./prompt";
-import type { ScoreErrorBody, ScoreRequestBody, ScoreResponseBody } from "./types";
+import type {
+  MapScoreErrorBody,
+  MapScoreResponseBody,
+  ScoreErrorBody,
+  ScoreErrorCode,
+  ScoreRequestBody,
+  ScoreResponseBody,
+} from "./types";
 import { QuotaExceededError, usageBudget } from "./usage-budget";
 
 let client: TypeSafeClient | null = null;
@@ -68,13 +77,33 @@ export async function scoreItem(
   return { itemName: body.itemName, answers };
 }
 
-export function toErrorBody(itemName: string, err: unknown): ScoreErrorBody {
+/**
+ * Scores every country on one factor in a single Jev call (one rubric
+ * question per country, ~12k input tokens). Charged against the shared daily
+ * budget and the IP's separate map allowance.
+ * @throws {QuotaExceededError} The budget or this IP's map allowance is spent.
+ */
+export async function scoreCountries(
+  factor: string,
+  ip: string,
+  signal?: AbortSignal,
+): Promise<MapScoreResponseBody> {
+  usageBudget.reserve(ip, "map");
+  const result = await getClient().systemOne(
+    { state: buildState(factor), questions: buildQuestions(COUNTRIES) },
+    // 176 questions in one request take longer than the client's default timeout.
+    { timeout: 45_000, ...(signal ? { signal } : {}) },
+  );
+  usageBudget.record(result.usage.input_tokens);
+  return { scores: parseAnswers(COUNTRIES, result.answers) };
+}
+
+export function describeError(err: unknown): MapScoreErrorBody {
   if (err instanceof QuotaExceededError) {
-    return { itemName, error: err.message, code: "quota_exceeded" };
+    return { error: err.message, code: "quota_exceeded" };
   }
   if (err instanceof RateLimitError) {
     return {
-      itemName,
       error: "Jev is rate-limiting requests. Retrying shortly.",
       code: "rate_limited",
       retryAfterMs: err.retryAfterMs,
@@ -82,13 +111,31 @@ export function toErrorBody(itemName: string, err: unknown): ScoreErrorBody {
   }
   if (err instanceof APIError) {
     if (err.status === 529 || err.status >= 500) {
-      return { itemName, error: "Jev is temporarily overloaded.", code: "overloaded" };
+      return { error: "Jev is temporarily overloaded.", code: "overloaded" };
     }
-    return { itemName, error: err.message || "Jev rejected the request.", code: "invalid" };
+    return { error: err.message || "Jev rejected the request.", code: "invalid" };
   }
   if (err instanceof APIConnectionError) {
-    return { itemName, error: "Could not reach Jev.", code: "connection" };
+    return { error: "Could not reach Jev.", code: "connection" };
   }
   const message = err instanceof Error ? err.message : "Unknown error";
-  return { itemName, error: message, code: "unknown" };
+  return { error: message, code: "unknown" };
+}
+
+export function toErrorBody(itemName: string, err: unknown): ScoreErrorBody {
+  return { itemName, ...describeError(err) };
+}
+
+export function statusForErrorCode(code: ScoreErrorCode): number {
+  switch (code) {
+    case "rate_limited":
+    case "quota_exceeded":
+      return 429;
+    case "overloaded":
+      return 529;
+    case "invalid":
+      return 422;
+    default:
+      return 502;
+  }
 }

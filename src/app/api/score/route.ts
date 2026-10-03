@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { COLLECTIONS } from "@/lib/collections";
-import { scoreItem, toErrorBody } from "@/lib/jev-client";
+import { scoreItem, statusForErrorCode, toErrorBody } from "@/lib/jev-client";
 import { MAX_FACTORS, MAX_FACTOR_TEXT_LENGTH, MAX_ITEM_NAME_LENGTH } from "@/lib/limits";
 import type { ScoreRequestBody } from "@/lib/types";
 import { clientIp } from "@/lib/usage-budget";
@@ -57,14 +57,6 @@ export async function POST(request: Request) {
     return NextResponse.json(result);
   } catch (err) {
     const errorBody = toErrorBody(body.itemName, err);
-    const status =
-      errorBody.code === "rate_limited" || errorBody.code === "quota_exceeded"
-        ? 429
-        : errorBody.code === "overloaded"
-          ? 529
-          : errorBody.code === "invalid"
-            ? 422
-            : 502;
-    return NextResponse.json(errorBody, { status });
+    return NextResponse.json(errorBody, { status: statusForErrorCode(errorBody.code) });
   }
 }

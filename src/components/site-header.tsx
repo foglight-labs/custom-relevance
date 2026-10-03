@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Star } from "lucide-react";
 import { HowItWorksButton } from "@/components/how-it-works-button";
+import { SiteNav } from "@/components/site-nav";
 import { REPO_URL, formatStars, getStarCount } from "@/lib/github";
 
 export async function SiteHeader() {
@@ -8,13 +9,18 @@ export async function SiteHeader() {
 
   return (
     <header className="flex h-[56px] items-center justify-between gap-3 border-b border-hairline bg-page px-4 sm:h-[52px] sm:px-8">
-      <a
-        href="https://foglight.co"
-        className="inline-flex min-w-0 items-center gap-2.5 text-main transition-opacity hover:opacity-70"
-      >
-        <Image src="/foglight.svg" alt="Foglight" width={22} height={22} className="rounded-[5px]" />
-        <span className="truncate text-[14px] font-semibold tracking-tight">Custom Relevance</span>
-      </a>
+      <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+        <a
+          href="https://foglight.co"
+          className="inline-flex min-w-0 shrink-0 items-center gap-2.5 text-main transition-opacity hover:opacity-70"
+        >
+          <Image src="/foglight.svg" alt="Foglight" width={22} height={22} className="rounded-[5px]" />
+          <span className="hidden truncate text-[14px] font-semibold tracking-tight sm:inline">
+            Custom Relevance
+          </span>
+        </a>
+        <SiteNav />
+      </div>
 
       <div className="flex shrink-0 items-center gap-2">
         <a

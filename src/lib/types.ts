@@ -1,3 +1,5 @@
+import type { CountryScore } from "./map/questions";
+
 /**
  * Shared domain types for the Jev ranking playground.
  *
@@ -84,15 +86,28 @@ export interface ScoreResponseBody {
   answers: Record<string, number>;
 }
 
+export type ScoreErrorCode =
+  | "rate_limited"
+  | "quota_exceeded"
+  | "overloaded"
+  | "invalid"
+  | "connection"
+  | "unknown";
+
 export interface ScoreErrorBody {
   itemName: string;
   error: string;
-  code:
-    | "rate_limited"
-    | "quota_exceeded"
-    | "overloaded"
-    | "invalid"
-    | "connection"
-    | "unknown";
+  code: ScoreErrorCode;
   retryAfterMs?: number;
 }
+
+/** Payload sent from the client to /api/map/score. */
+export interface MapScoreRequestBody {
+  factor: string;
+}
+
+export interface MapScoreResponseBody {
+  scores: CountryScore[];
+}
+
+export type MapScoreErrorBody = Omit<ScoreErrorBody, "itemName">;
